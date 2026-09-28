@@ -1,0 +1,11 @@
+google-genai
+python-dotenv
+pydantic
+fastapi
+uvicorn
+python-multipart
+groq
+openai
+huggingface_hub
+langchain
+langchain-core
