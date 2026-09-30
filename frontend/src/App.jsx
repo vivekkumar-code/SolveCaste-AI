@@ -4,6 +4,17 @@ import "./App.css";
 const API_URL =
   import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
+const getAssetUrl = (path) => {
+  if (!path) return "";
+
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+};
+
+
 function App() {
   const [activePage, setActivePage] = useState("new");
   const [activeTab, setActiveTab] = useState("solution");
@@ -406,6 +417,18 @@ function App() {
     "Motion on a rough inclined plane",
     "Derive formula for normal reaction",
   ];
+
+  // =====================================================
+  // HANDWRITTEN SOLUTION IMAGE
+  // =====================================================
+
+  const handwrittenImagePath =
+    solution?.handwritten_image_url ||
+    solution?.handwritten_image ||
+    "";
+
+  const handwrittenImageUrl =
+    getAssetUrl(handwrittenImagePath);
 
   // =====================================================
   // PROFILE
@@ -1095,353 +1118,113 @@ function App() {
             )}
 
             {/* =================================================
-                TABS
-            ================================================= */}
-
-            {solution && (
-
-              <div className="content-tabs">
-
-                <button
-                  className={
-                    activeTab === "solution"
-                      ? "content-tab active"
-                      : "content-tab"
-                  }
-                  onClick={() =>
-                    setActiveTab(
-                      "solution"
-                    )
-                  }
-                >
-                  ▣ Solution
-                </button>
-
-                <button
-                  className={
-                    activeTab === "diagram"
-                      ? "content-tab active"
-                      : "content-tab"
-                  }
-                  onClick={() =>
-                    setActiveTab(
-                      "diagram"
-                    )
-                  }
-                >
-                  ◇ Diagram
-                </button>
-
-                <button
-                  className={
-                    activeTab === "concepts"
-                      ? "content-tab active"
-                      : "content-tab"
-                  }
-                  onClick={() =>
-                    setActiveTab(
-                      "concepts"
-                    )
-                  }
-                >
-                  ♧ Key Concepts
-                </button>
-
-                <button
-                  className={
-                    activeTab === "doubt"
-                      ? "content-tab active"
-                      : "content-tab"
-                  }
-                  onClick={() =>
-                    setActiveTab(
-                      "doubt"
-                    )
-                  }
-                >
-                  ♧ Doubt (Ask AI)
-                </button>
-
-              </div>
-
-            )}
-
-            {/* =================================================
-                CONTENT
+                A4 + DIAGRAM ONLY
             ================================================= */}
 
             {solution && (
 
               <div className="workspace">
 
-                {/* LEFT CONTENT */}
+                {/* LEFT: HANDWRITTEN A4 */}
 
                 <section className="solution-column">
 
-                  {/* SOLUTION */}
+                  <div className="panel">
 
-                  {activeTab ===
-                    "solution" && (
-
-                    <div className="panel">
-
-                      <div className="panel-title">
-
-                        <span>☷</span>
-
-                        <h2>
-                          Step-by-Step
-                          Solution
-                        </h2>
-
-                      </div>
-
-                      <div className="steps-list">
-
-                        {(solution.steps ||
-                          []
-                        ).map(
-                          (
-                            step,
-                            index
-                          ) => (
-
-                            <div
-                              className="solution-step"
-                              key={index}
-                            >
-
-                              <div className="step-badge">
-                                {index +
-                                  1}
-                              </div>
-
-                              <div className="step-body">
-                                {step}
-                              </div>
-
-                            </div>
-
-                          )
-                        )}
-
-                      </div>
-
-                      {solution.final_answer && (
-
-                        <div className="final-box">
-
-                          <div className="final-icon">
-                            ✓
-                          </div>
-
-                          <div>
-
-                            <span>
-                              Final Answer
-                            </span>
-
-                            <p>
-                              {
-                                solution.final_answer
-                              }
-                            </p>
-
-                          </div>
-
-                        </div>
-
-                      )}
-
+                    <div className="panel-title">
+                      <span>✎</span>
+                      <h2>Handwritten A4 Solution</h2>
                     </div>
 
-                  )}
+                    {handwrittenImageUrl ? (
 
-                  {/* DIAGRAM */}
-
-                  {activeTab ===
-                    "diagram" && (
-
-                    <div className="panel">
-
-                      <div className="panel-title">
-
-                        <span>◇</span>
-
-                        <h2>
-                          Generated
-                          Diagram
-                        </h2>
-
-                      </div>
-
-                      {solution.diagram_svg ? (
+                      <>
 
                         <div
-                          className="large-diagram"
-                          dangerouslySetInnerHTML={{
-                            __html:
-                              solution.diagram_svg,
+                          style={{
+                            background: "#ffffff",
+                            borderRadius: "10px",
+                            padding: "10px",
+                            overflow: "auto",
+                            boxShadow:
+                              "0 4px 18px rgba(0,0,0,0.08)",
                           }}
-                        />
+                        >
 
-                      ) : (
+                          <img
+                            src={handwrittenImageUrl}
+                            alt="SolveCast AI handwritten A4 solution"
+                            style={{
+                              display: "block",
+                              width: "100%",
+                              maxWidth: "850px",
+                              height: "auto",
+                              margin: "0 auto",
+                              background: "#ffffff",
+                            }}
+                            onError={() => {
+                              setError(
+                                "Handwritten solution image load nahi ho pa raha. Backend image endpoint check karo."
+                              );
+                            }}
+                          />
 
-                        <div className="no-diagram">
-                          No diagram is
-                          required for this
-                          question.
                         </div>
 
-                      )}
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            marginTop: "12px",
+                          }}
+                        >
 
-                    </div>
+                          <a
+                            href={handwrittenImageUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              textDecoration: "none",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className="solve-main-btn"
+                            >
+                              Open A4 ↗
+                            </button>
+                          </a>
 
-                  )}
+                        </div>
 
-                  {/* CONCEPTS */}
+                      </>
 
-                  {activeTab ===
-                    "concepts" && (
+                    ) : (
 
-                    <div className="panel">
-
-                      <div className="panel-title">
-
-                        <span>♧</span>
-
-                        <h2>
-                          Key Concepts
-                        </h2>
-
+                      <div className="no-diagram">
+                        A4 solution is being generated...
                       </div>
 
-                      <div className="concept-list">
+                    )}
 
-                        <div className="concept">
-                          <b>1.</b>
-                          Understand the
-                          given values.
-                        </div>
-
-                        <div className="concept">
-                          <b>2.</b>
-                          Identify the
-                          required formula.
-                        </div>
-
-                        <div className="concept">
-                          <b>3.</b>
-                          Substitute the
-                          values.
-                        </div>
-
-                        <div className="concept">
-                          <b>4.</b>
-                          Verify the final
-                          result.
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                  )}
-
-                  {/* DOUBT */}
-
-                  {activeTab ===
-                    "doubt" && (
-
-                    <div className="panel">
-
-                      <div className="panel-title">
-
-                        <span>♧</span>
-
-                        <h2>
-                          Ask AI About
-                          This Solution
-                        </h2>
-
-                      </div>
-
-                      <textarea
-                        id="doubt-box"
-                        className="doubt-textarea"
-                        value={doubt}
-                        onChange={(e) =>
-                          setDoubt(
-                            e.target.value
-                          )
-                        }
-                        placeholder="Ask anything about this solution..."
-                      />
-
-                      <button
-                        className="ask-btn"
-                        onClick={
-                          askDoubt
-                        }
-                        disabled={
-                          doubtLoading ||
-                          !doubt.trim()
-                        }
-                      >
-                        {doubtLoading
-                          ? "Thinking..."
-                          : "Ask AI →"}
-                      </button>
-
-                      {doubtAnswer && (
-
-                        <div className="ai-answer">
-
-                          <b>
-                            AI Answer
-                          </b>
-
-                          <p>
-                            {
-                              doubtAnswer
-                            }
-                          </p>
-
-                        </div>
-
-                      )}
-
-                    </div>
-
-                  )}
+                  </div>
 
                 </section>
 
-                {/* RIGHT WORKSPACE */}
+                {/* RIGHT: DIAGRAM */}
 
                 <aside className="right-workspace">
-
-                  {/* DIAGRAM */}
 
                   <div className="side-panel">
 
                     <div className="side-title">
 
                       <div>
-
                         <span>◇</span>
-
-                        <h3>
-                          Diagram
-                        </h3>
-
+                        <h3>Diagram</h3>
                       </div>
 
-                      <button
-                        onClick={
-                          downloadSVG
-                        }
-                      >
+                      <button onClick={downloadSVG}>
                         ↓ Download SVG
                       </button>
 
@@ -1452,8 +1235,7 @@ function App() {
                       <div
                         className="diagram-preview"
                         dangerouslySetInnerHTML={{
-                          __html:
-                            solution.diagram_svg,
+                          __html: solution.diagram_svg,
                         }}
                       />
 
@@ -1467,261 +1249,101 @@ function App() {
 
                   </div>
 
-                  {/* KEY FORMULAS */}
-
-                  <div className="side-panel">
-
-                    <div className="side-title simple">
-
-                      <div>
-
-                        <span>∑</span>
-
-                        <h3>
-                          Key Formulas
-                          Used
-                        </h3>
-
-                      </div>
-
-                    </div>
-
-                    <ul className="formula-list">
-
-                      <li>
-                        N = mg cos θ
-                      </li>
-
-                      <li>
-                        f = μN
-                      </li>
-
-                      <li>
-                        F = mg sin θ − f
-                      </li>
-
-                      <li>
-                        a = F / m
-                      </li>
-
-                    </ul>
-
-                  </div>
-
-                </aside>
-
-                {/* FAR RIGHT SIDEBAR */}
-
-                <aside className="tools-sidebar">
-
-                  <div className="tools-panel">
-
-                    <h3>
-                      ◈ Related Tools
-                    </h3>
-
-                    <button
-                      className="tool-card"
-                      onClick={
-                        explainConcept
-                      }
-                    >
-
-                      <span>▣</span>
-
-                      <div>
-
-                        <b>
-                          Explain Concept
-                        </b>
-
-                        <small>
-                          Get a simple
-                          explanation
-                        </small>
-
-                      </div>
-
-                    </button>
-
-                    <button
-                      className="tool-card"
-                      onClick={() =>
-                        setActiveTab(
-                          "doubt"
-                        )
-                      }
-                    >
-
-                      <span>?</span>
-
-                      <div>
-
-                        <b>
-                          Ask Doubt
-                        </b>
-
-                        <small>
-                          Ask AI about
-                          this solution
-                        </small>
-
-                      </div>
-
-                    </button>
-
-                    <button
-                      className="tool-card"
-                      onClick={() =>
-                        setError(
-                          "Notes & PDF system will be added in Phase 2."
-                        )
-                      }
-                    >
-
-                      <span>▥</span>
-
-                      <div>
-
-                        <b>
-                          Generate Notes
-                        </b>
-
-                        <small>
-                          Save as study
-                          notes
-                        </small>
-
-                      </div>
-
-                    </button>
-
-                    <button
-                      className="tool-card"
-                      onClick={() =>
-                        setError(
-                          "PDF export will be added soon."
-                        )
-                      }
-                    >
-
-                      <span>▣</span>
-
-                      <div>
-
-                        <b>
-                          Convert to PDF
-                        </b>
-
-                        <small>
-                          Download solution
-                          as PDF
-                        </small>
-
-                      </div>
-
-                    </button>
-
-                  </div>
-
-                  {/* RELATED QUESTIONS */}
-
-                  <div className="tools-panel">
-
-                    <div className="related-header">
-
-                      <h3>
-                        Related Questions
-                      </h3>
-
-                      <span>
-                        View All
-                      </span>
-
-                    </div>
-
-                    {relatedQuestions.map(
-                      (
-                        item,
-                        index
-                      ) => (
-
-                        <button
-                          className="related-item"
-                          key={index}
-                          onClick={() =>
-                            useRelatedQuestion(
-                              item
-                            )
-                          }
-                        >
-
-                          <span>
-                            {index + 1}
-                          </span>
-
-                          <p>
-                            {item}
-                          </p>
-
-                        </button>
-
-                      )
-                    )}
-
-                  </div>
-
-                  {/* DOUBT */}
-
-                  <div className="tools-panel doubt-panel">
-
-                    <h3>
-                      ♧ Doubt? Ask AI
-                    </h3>
-
-                    <textarea
-                      value={doubt}
-                      onChange={(e) =>
-                        setDoubt(
-                          e.target.value
-                        )
-                      }
-                      placeholder="Ask anything about this solution..."
-                    />
-
-                    <button
-                      onClick={() => {
-
-                        if (!solution) {
-                          setError(
-                            "Please solve a question first."
-                          );
-                          return;
-                        }
-
-                        setActiveTab(
-                          "doubt"
-                        );
-
-                        askDoubt();
-
-                      }}
-                      disabled={
-                        doubtLoading ||
-                        !doubt.trim()
-                      }
-                    >
-                      {doubtLoading
-                        ? "..."
-                        : "➤"}
-                    </button>
-
-                  </div>
-
                 </aside>
 
               </div>
 
+            )}
+
+            {/* =================================================
+                DOUBT SECTION
+            ================================================= */}
+
+            {solution && (
+              <section
+                className="panel"
+                style={{
+                  marginTop: "20px",
+                  padding: "22px",
+                }}
+              >
+                <div
+                  className="panel-title"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
+                >
+                  <span>💬</span>
+                  <h2>Doubt — Ask AI</h2>
+                </div>
+
+                <p
+                  style={{
+                    margin: "8px 0 16px",
+                    color: "#6b7280",
+                  }}
+                >
+                  Solution ke kisi bhi part ke baare me doubt pucho.
+                </p>
+
+                <textarea
+                  id="doubt-box"
+                  value={doubt}
+                  onChange={(e) => setDoubt(e.target.value)}
+                  placeholder="Example: Ye step kaise aaya?"
+                  rows={4}
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    resize: "vertical",
+                    padding: "14px",
+                    border: "1px solid #d9dee8",
+                    borderRadius: "10px",
+                    outline: "none",
+                    fontSize: "15px",
+                    lineHeight: "1.5",
+                    background: "#fff",
+                  }}
+                />
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    marginTop: "12px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="solve-main-btn"
+                    onClick={askDoubt}
+                    disabled={doubtLoading || !doubt.trim()}
+                  >
+                    {doubtLoading ? "AI is thinking..." : "Ask AI →"}
+                  </button>
+                </div>
+
+                {doubtAnswer && (
+                  <div
+                    style={{
+                      marginTop: "18px",
+                      padding: "18px",
+                      borderRadius: "10px",
+                      background: "#f7f9fc",
+                      border: "1px solid #e2e7ef",
+                      whiteSpace: "pre-wrap",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    <strong>AI Answer</strong>
+                    <div style={{ marginTop: "8px" }}>
+                      {doubtAnswer}
+                    </div>
+                  </div>
+                )}
+              </section>
             )}
 
           </>
